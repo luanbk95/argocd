@@ -18,7 +18,7 @@ spec:
         replicas: 3
   template:
     metadata:
-      name: app-set-{{env}}
+      name: "app-set-{{env}}"
       annotations:
         argocd.argoproj.io/sync-wave: "10"
     spec:
@@ -29,11 +29,12 @@ spec:
         path: helm-guestbook
         helm:
           releaseName: guestbook
-          values: |
-            replicaCount: {{replicas}}
+          parameters:
+          - name: replicaCount
+            value: "{{replicas}}"
       destination:
         server: https://kubernetes.default.svc
-        namespace: {{namespace}}
+        namespace: "{{namespace}}"
       syncPolicy:
         automated:
           prune: true
