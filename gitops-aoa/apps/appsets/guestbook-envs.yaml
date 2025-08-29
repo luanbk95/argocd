@@ -1,0 +1,43 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: guestbook-envs
+  namespace: argocd
+spec:
+  generators:
+  - list:
+      elements:
+      - env: dev
+        namespace: argocd-dev
+        replicas: 1
+      - env: stg
+        namespace: argocd-stg
+        replicas: 2
+      - env: prod
+        namespace: argocd-prod
+        replicas: 3
+  template:
+    metadata:
+      name: app-set-{{env}}
+      annotations:
+        argocd.argoproj.io/sync-wave: "10"
+    spec:
+      project: demo
+      source:
+        repoURL: https://github.com/argoproj/argocd-example-apps.git
+        targetRevision: HEAD
+        path: helm-guestbook
+        helm:
+          releaseName: guestbook
+          values: |
+            replicaCount: {{replicas}}
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: {{namespace}}
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+
