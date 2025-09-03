@@ -1,3 +1,4 @@
+# apps/appsets/guestbook-envs.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -8,14 +9,11 @@ spec:
   - list:
       elements:
       - env: dev
-        namespace: argocd-dev
-        replicas: 1
+        ns: argocd-dev
       - env: stg
-        namespace: argocd-stg
-        replicas: 2
+        ns: argocd-stg
       - env: prod
-        namespace: argocd-prod
-        replicas: 3
+        ns: argocd-prod
   template:
     metadata:
       name: "app-set-{{env}}"
@@ -29,16 +27,12 @@ spec:
         path: helm-guestbook
         helm:
           releaseName: guestbook
-          parameters:
-          - name: replicaCount
-            value: "{{replicas}}"
       destination:
         server: https://kubernetes.default.svc
-        namespace: "{{namespace}}"
+        namespace: "{{ns}}"
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
         syncOptions:
         - CreateNamespace=true
-
